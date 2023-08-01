@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer List</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Customer List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="customerTableBody">
+                <!-- Customer data will be populated dynamically using JavaScript -->
+            </tbody>
+        </table>
+        <button onclick="location.href='add_customer.html'">Add New Customer</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Retrieve the bearer token from localStorage
+            const token = localStorage.getItem("bearer_token");
+
+            // Function to fetch the customer list
+            function fetchCustomerList() {
+                $.ajax({
+                    url: "https://qa2.sunbasedata.com/sunbase/portal/api/assignment.jsp?cmd=get_customer_list",
+                    type: "GET",
+                    headers: {
+                        "Authorization": "Bearer " + token
+                    },
+                    success: function (data) {
+                        // Process the customer list and display it in the table
+                        let tableRows = "";
+                        data.forEach(function (customer) {
+                            tableRows += `<tr>
+                                            <td>${customer.first_name}</td>
+                                            <td>${customer.last_name}</td>
+                                            <td>${customer.email}</td>
+                                            <td>${customer.phone}</td>
+                                            <td>
+                                                <button onclick="deleteCustomer('${customer.uuid}')">Delete</button>
+                                                <button onclick="updateCustomer('${customer.uuid}')">Update</button>
+                                            </td>
+                                        </tr>`;
+                        });
+                        $("#customerTableBody").html(tableRows);
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Failed to retrieve customer list.");
+                    }
+                });
+            }
+
+            // Call the fetchCustomerList function on page load
+            fetchCustomerList();
+        });
+
+        // Define the deleteCustomer and updateCustomer functions
+        function deleteCustomer(uuid) {
+            // Make a POST request to delete the customer
+            $.ajax({
+                url: "https://qa2.sunbasedata.com/sunbase/portal/api/assignment.jsp?cmd=delete&uuid=" + uuid,
+                type: "POST",
+                headers: {
+                    "Authorization": "Bearer " + token
+                },
+                success: function (data) {
+                    alert("Customer deleted successfully!");
+                    // Refresh the customer list
+                    fetchCustomerList();
+                },
+                error: function (xhr, status, error) {
+                    alert("Failed to delete customer.");
+                }
+            });
+        }
+
+        function updateCustomer(uuid) {
+            // Redirect to the Update Customer screen with the customer UUID as a parameter
+            window.location.href = "update_customer.html?uuid=" + uuid;
+        }
+    </script>
+</body>
+</html>

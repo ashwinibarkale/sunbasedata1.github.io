@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="login_id">Username:</label>
+            <input type="text" id="login_id" name="login_id" required><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#loginForm").submit(function (event) {
+                event.preventDefault();
+                const login_id = $("#login_id").val();
+                const password = $("#password").val();
+
+                // Make a POST request to the authentication API
+                $.ajax({
+                    url: "https://qa2.sunbasedata.com/sunbase/portal/api/assignment_auth.jsp",
+                    type: "POST",
+                    data: JSON.stringify({ login_id: login_id, password: password }),
+                    contentType: "application/json",
+                    success: function (data) {
+                        // Save the received bearer token for subsequent API calls
+                        const token = data.token; // Assuming the API response contains the token in the 'token' field
+                        // Store the token in localStorage or sessionStorage for later use
+                        localStorage.setItem("bearer_token", token);
+
+                        // Redirect to the Customer List screen
+                        window.location.href = "customer_list.html";
+                    },
+                    error: function (xhr, status, error) {
+                        // Handle authentication error (401)
+                        alert("Authentication failed. Please check your credentials.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
